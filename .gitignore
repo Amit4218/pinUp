@@ -12,3 +12,5 @@ wheels/
 # local development file
 pincode_data.json
 datafile.csv
+temp/
+test.py
