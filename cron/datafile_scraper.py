@@ -21,13 +21,17 @@ class DataFileScraper:
         self._file_download_dir = Path("temp")
         self._req_session = requests.Session()
         self.logger = logger
+        self.driver.execute_cdp_cmd("Network.enable", {})
+        self.request_headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        }
+        
 
     def _add_webdriver_arguments(self):
         """An helper to add arguments to the webdriver options."""
         
         self.options.set_capability("goog:loggingPrefs",{"performance": "ALL"})
         self.options.add_argument("--headless=new")
-        self.driver.execute_cdp_cmd("Network.enable", {})
         
     def _response_listiner(self) -> str | None:
         """listens to the response request after the form submission"""
@@ -48,9 +52,9 @@ class DataFileScraper:
                         {"requestId": request_id}
                     )
 
-                    response_body = body["body"]
-                    
-                    return str(response_body["download_url"]).replace("\\","")
+                    response_body = json.loads(body["body"])
+
+                    return response_body["download_url"]
                 
         return None
 
@@ -58,20 +62,14 @@ class DataFileScraper:
     def _captcha_image_downloader(self, src:str) -> str:
         
         self.logger.info("[CSV FILE DOWNLOAD] Captca image download started...")
-        
-        self.request_headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-        }
 
         if not os.path.exists(self._file_download_dir):
             os.makedirs(self._file_download_dir)
             
         file_path = f"{self._file_download_dir}/captcha.png"
         
-        res = self._req_session.get(src, headers=self.request_headers)
-        
-        if not res.status_code == 200:
-            raise requests.RequestException
+        res = self._req_session.get(src, headers=self.request_headers)        
+        res.raise_for_status()
         
         self.logger.info("[CSV FILE DOWNLOAD] Download successfull...")
         with open(file_path, mode="wb") as f:
@@ -97,15 +95,19 @@ class DataFileScraper:
 
         
     
-    def _pincode_csv_downloader(self, download_url:str) -> None:
+    def _pincode_csv_downloader(self, download_url:str) -> str:
         self.logger.info("[CSV FILE DOWNLOAD] Downloadind csv file started...")
-        file_name = "datafile.csv"
+        
+        file_name = f"{self._file_download_dir}/datafile.csv"
+        
         file_contents = self._req_session.get(url=download_url, headers=self.request_headers)
-
+        file_contents.raise_for_status()
+        
         with open(file_name, "wb") as f:
             f.write(file_contents.content)
         
         self.logger.info("[CSV FILE DOWNLOAD] Download complete...")
+        return file_name
     
     def start(self):
         try:
@@ -161,7 +163,6 @@ class DataFileScraper:
 
                     # listening to the req and fetching the download url from the response data
                     download_url = self._response_listiner()
-                    self.driver.quit() # exit the browser
                     
                     # download the csv file
                     if download_url:
