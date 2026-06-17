@@ -1,49 +1,21 @@
 from typing import Annotated
-
 from fastapi import FastAPI, Query, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from contextlib import asynccontextmanager
-from apscheduler.schedulers.background import BackgroundScheduler
-from cron.update_pincode_data import pincode_update_job
 from pinsearch_sdk import PinSearch, PincodeData 
 from schema.response_schemas import PincodeNotFound, PublicApiResponse
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.middleware import SlowAPIMiddleware
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
-from settings import settings
-from pathlib import Path
 
 
-scheduler = BackgroundScheduler()
-file_path = Path(f"{settings.DOWNLOAD_DIR}/pincode_data.json")
-client = PinSearch(pincode_file=file_path)
+client = PinSearch()
 limiter = Limiter(key_func=get_remote_address)
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    
-    if not file_path.exists():
-        pincode_update_job()
-        
-    scheduler.add_job(
-        func=pincode_update_job,
-        trigger="cron",
-        day=1,
-        hour=0,
-        minute=0,
-        id="pincode_update_job",
-        replace_existing=True,
-    )
-    scheduler.start()
-    yield
-    scheduler.shutdown()
-
-
-app = FastAPI(lifespan=lifespan)
+app = FastAPI()
 
 app.add_middleware(SlowAPIMiddleware)
 app.add_middleware(
@@ -82,7 +54,7 @@ async def not_found_handler(request: Request, exc):
 
 @app.get("/root/health")
 async def root():
-    return {"status": "ok","data_file_exists": file_path.exists()}
+    return {"status": "ok","message": "Application running"}
 
 @app.get("/")
 async def home(req: Request):
