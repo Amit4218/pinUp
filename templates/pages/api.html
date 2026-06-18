@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
 
 <!--  -->
-{% block page_title %} API DOCS | Pinsearch Documentation {% endblock page_title
-%}
+{% block page_title %} API | Pinsearch Public Api Documentation {% endblock
+page_title %}
 
 <!--  -->
 {% block main_content %}
@@ -11,8 +11,13 @@
     id="loading"
     class="text-xs font-mono tracking-widest text-center mt-40 text-slate-400 dark:text-slate-500 uppercase"
   >
-    Comming Soon | Api Docs Are On The Way...
+    Fetching Api specifications document...
   </div>
+  <article
+    id="markdown-content"
+    class="prose prose-slate dark:prose-invert prose-sm md:prose-base max-w-none hidden prose-headings:font-normal prose-headings:tracking-tight text-slate-800 dark:text-slate-200 prose-headings:text-slate-900 dark:prose-headings:text-white prose-a:text-slate-900 dark:prose-a:text-white prose-a:underline-offset-4 /* Multi-line code block structure setups */ prose-pre:bg-slate-950 dark:prose-pre:bg-slate-900/40 prose-pre:rounded-lg prose-pre:font-mono prose-pre:p-5 prose-pre:border prose-pre:border-slate-100 dark:prose-pre:border-slate-900 prose-pre:code:text-white dark:prose-pre:code:text-slate-200 prose-pre:code:bg-transparent prose-pre:code:p-0 /* Direct text code string block protections */ [&_:not(pre)>code]:text-slate-900 dark:[&_:not(pre)>code]:text-slate-200 [&_:not(pre)>code]:bg-slate-100 dark:[&_:not(pre)>code]:bg-slate-900/60 [&_:not(pre)>code]:px-1.5 [&_:not(pre)>code]:py-0.5 [&_:not(pre)>code]:rounded [&_:not(pre)>code]:font-mono [&_:not(pre)>code]:text-xs [&_:not(pre)>code]:font-medium prose-code:before:content-none prose-code:after:content-none"
+  ></article>
 </main>
 
+<script src="/static/javaScripts/api_docs.js"></script>
 {% endblock main_content %}
