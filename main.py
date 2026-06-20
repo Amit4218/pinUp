@@ -32,7 +32,7 @@ async def security_headers(request, call_next):
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-    response.headers["Cache-Control"] = "max-age=86400"
+    response.headers["Cache-Control"] = "public, max-age=86400"
     return response
 
 
